@@ -136,8 +136,15 @@ public class ExtendFunction {
      */
     public double calcFunctionBegin(double param) {
         double t = calcParamBegin(param);
-        double sum1 = differenceTable[0][0] + t*differenceTable[0][1] + (t*(t - 1)/2)*differenceTable[0][2]  
-                + (t*(t - 1)*(t - 2)/6)*differenceTable[0][3] + (t*(t - 1)*(t - 2)*(t - 3)/24)*differenceTable[0][4];
+        int index = 0;
+        double nearSmall = nearestSmall(param);
+        for (int i = 0; i < argument.length; i++) {
+            if (nearSmall == argument[i]) {
+                index = i;
+            }
+        }
+        double sum1 = differenceTable[index][0] + t*differenceTable[index][1] + (t*(t - 1)/2)*differenceTable[index][2]  
+                + (t*(t - 1)*(t - 2)/6)*differenceTable[index][3] + (t*(t - 1)*(t - 2)*(t - 3)/24)*differenceTable[index][4];
         return sum1;
     }
     
