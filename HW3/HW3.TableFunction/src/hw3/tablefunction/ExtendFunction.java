@@ -20,6 +20,8 @@ public class ExtendFunction {
         String[] hLine = line.split(" ");
         hLength = Double.parseDouble(hLine[0]);
         int counter = 0;
+        //Seting the mark in the beginnig 
+        reader.mark(1);
         while (reader.readLine() != null) {
             counter++;
         }
@@ -28,17 +30,17 @@ public class ExtendFunction {
         differenceTable = new double[counter][deltaDegree + 1];
         reader.close();
         
-        BufferedReader readerForNum = new BufferedReader(new FileReader(path));
-        // skip first param
-        readerForNum.readLine();
+        reader = new BufferedReader(new FileReader(path));
+        // skip first line
+        reader.readLine();
         for (int i = 0; i < counter; i++) {
-            line = readerForNum.readLine();
+            line = reader.readLine();
             String[] data = line.split(" ");
             // Gets values arguments and function values
             argument[i] = Double.parseDouble(data[0]);
             differenceTable[i][0] = Double.parseDouble(data[1]);
         }
-        readerForNum.close();
+        reader.close();
         countFinitDifferences();
         printer = new PrintWriter(new FileOutputStream(outpath));
     }
@@ -64,16 +66,22 @@ public class ExtendFunction {
     public void outputEQ() {
         printer.println();
         printer.println("Для начала таблицы:");
-        printer.println("x1* = " + x1);
-        printer.println("x0 = " + nearestSmall(x1));
-        printer.println("t = " + calcParamBegin(x1));
-        printer.println("P(t) = " + calcFunctionBegin(x1));
+        printer.println("x3* = " + x3);
+        printer.println("x0 = " + nearestSmall(x3));
+        printer.println("t = " + calcParamBegin(x3));
+        printer.println("P(t) = " + calcFunctionBegin(x3));
         printer.println();
         printer.println("Для конца таблицы:");
-        printer.println("x2* = " + x2);
-        printer.println("x0 = " + nearestBig(x2));
-        printer.println("t = " + calcParamEnd(x2));
-        printer.println("P(t) = " + calcFunctionEnd(x2));
+        printer.println("x3* = " + x3);
+        printer.println("x0 = " + nearestBig(x3));
+        printer.println("t = " + calcParamEnd(x3));
+        printer.println("P(t) = " + calcFunctionEnd(x3));
+        printer.println();
+        printer.println("Для середины таблицы:");
+        printer.println("x3* = " + x3);
+        printer.println("x0 = " + nearestSmall(x3));
+        printer.println("t = " + calcParamBegin(x3));
+        printer.println("P(t) = " + calcFunctionMid(x3));
         printer.close();
     }
     
@@ -136,13 +144,8 @@ public class ExtendFunction {
      */
     public double calcFunctionBegin(double param) {
         double t = calcParamBegin(param);
-        int index = 0;
         double nearSmall = nearestSmall(param);
-        for (int i = 0; i < argument.length; i++) {
-            if (nearSmall == argument[i]) {
-                index = i;
-            }
-        }
+        int index = findIndex(nearSmall);
         double sum1 = differenceTable[index][0] + t*differenceTable[index][1] + (t*(t - 1)/2)*differenceTable[index][2]  
                 + (t*(t - 1)*(t - 2)/6)*differenceTable[index][3] + (t*(t - 1)*(t - 2)*(t - 3)/24)*differenceTable[index][4];
         return sum1;
@@ -155,17 +158,41 @@ public class ExtendFunction {
      */
     public double calcFunctionEnd(double param) {
         double t = calcParamEnd(param);
-        int index = 0;
         double nearBig = nearestBig(param);
-        for (int i = 0; i < argument.length; i++) {
-            if (nearBig == argument[i]) {
-                index = i;
-            }
-        }
+        int index = findIndex(nearBig);
         double sum1 = differenceTable[index][0] + t*differenceTable[index - 1][1] + (t*(t + 1)/2)*differenceTable[index - 2][2]
                 + (t*(t + 1)*(t + 2)/6)*differenceTable[index - 3][3] + (t*(t + 1)*(t + 2)*(t + 3)/24)*differenceTable[index - 4][4]; 
         return sum1;
     }
+    
+    /**
+     * Finds required function value frim param
+     * @param param - function argument
+     * @return functuin value
+     */
+    public double calcFunctionMid(double param) {
+        double t = calcParamBegin(param);
+        double nearSmall = nearestSmall(param);
+        int index = findIndex(nearSmall);
+        double sum1 = differenceTable[index][0] + t*differenceTable[index][1] + (t*(t - 1)/2)*differenceTable[index - 1][2]
+                + (t*(t - 1)*(t + 1)/6)*differenceTable[index - 1][3] + (t*(t - 1)*(t + 1)*(t - 2)/24)*differenceTable[index - 2][4];
+        return sum1;
+    }
+    /**
+     * Finding index of current value
+     * @param number value, which index we are searching
+     * @return position in array
+     */
+    private int findIndex(double number) {
+        int index = 0;
+        for (int i = 0; i < argument.length; i++) {
+            if (number == argument[i]) {
+                index = i;
+            }
+        }
+        return index;
+    }
+    
     /*
      * Step length for argument 
      */
@@ -196,6 +223,8 @@ public class ExtendFunction {
      */
     private final double x1 = 0.124141;
     private final double x2 = 0.792321;
+    private final double x3 = 0.329726;
+    private final double y1 = 1.680208;
     
     private PrintWriter printer;
 }
