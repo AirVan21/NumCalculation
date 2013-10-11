@@ -20,8 +20,6 @@ public class ExtendFunction {
         String[] hLine = line.split(" ");
         hLength = Double.parseDouble(hLine[0]);
         int counter = 0;
-        //Seting the mark in the beginnig 
-        reader.mark(1);
         while (reader.readLine() != null) {
             counter++;
         }
@@ -82,6 +80,13 @@ public class ExtendFunction {
         printer.println("x0 = " + nearestSmall(x3));
         printer.println("t = " + calcParamBegin(x3));
         printer.println("P(t) = " + calcFunctionMid(x3));
+        printer.println();
+        printer.println("Задача обратного интерполирования (начало таблицы)");
+        printer.println("y* = " + y1);
+        printer.println("y0 = " + nearestSmallY(y1));
+        int index = findIndexY(nearestSmallY(y1));
+        printer.println("x0 = " + argument[index]);
+        printer.print("x* = " + calcArgumentBegin(y1));
         printer.close();
     }
     
@@ -124,6 +129,19 @@ public class ExtendFunction {
     }
     
     /*
+     * Finds nearest function value that smaller then param 
+     */
+    private double nearestSmallY(double param) {
+        double near = 0;
+        for (int i = 0; i < differenceTable.length - 1; i++) {
+            if ((differenceTable[i][0] < param) && (differenceTable[i + 1][0]) > param) {
+                near = differenceTable[i][0];
+            }
+        }
+        return near;
+    }
+    
+    /*
      * Parameter counting for the beginnig of the table
      */
     public double calcParamBegin(double param) {
@@ -145,10 +163,8 @@ public class ExtendFunction {
     public double calcFunctionBegin(double param) {
         double t = calcParamBegin(param);
         double nearSmall = nearestSmall(param);
-        int index = findIndex(nearSmall);
-        double sum1 = differenceTable[index][0] + t*differenceTable[index][1] + (t*(t - 1)/2)*differenceTable[index][2]  
-                + (t*(t - 1)*(t - 2)/6)*differenceTable[index][3] + (t*(t - 1)*(t - 2)*(t - 3)/24)*differenceTable[index][4];
-        return sum1;
+        int index = findIndexX(nearSmall);
+        return calcNewtonBegin(t, index);
     }
     
     /**
@@ -159,10 +175,8 @@ public class ExtendFunction {
     public double calcFunctionEnd(double param) {
         double t = calcParamEnd(param);
         double nearBig = nearestBig(param);
-        int index = findIndex(nearBig);
-        double sum1 = differenceTable[index][0] + t*differenceTable[index - 1][1] + (t*(t + 1)/2)*differenceTable[index - 2][2]
-                + (t*(t + 1)*(t + 2)/6)*differenceTable[index - 3][3] + (t*(t + 1)*(t + 2)*(t + 3)/24)*differenceTable[index - 4][4]; 
-        return sum1;
+        int index = findIndexX(nearBig);
+        return calcNewtonEnd(t, index);
     }
     
     /**
@@ -173,17 +187,16 @@ public class ExtendFunction {
     public double calcFunctionMid(double param) {
         double t = calcParamBegin(param);
         double nearSmall = nearestSmall(param);
-        int index = findIndex(nearSmall);
-        double sum1 = differenceTable[index][0] + t*differenceTable[index][1] + (t*(t - 1)/2)*differenceTable[index - 1][2]
-                + (t*(t - 1)*(t + 1)/6)*differenceTable[index - 1][3] + (t*(t - 1)*(t + 1)*(t - 2)/24)*differenceTable[index - 2][4];
-        return sum1;
+        int index = findIndexX(nearSmall);
+        return calcNewtonMid(t, index);
     }
+    
     /**
      * Finding index of current value
      * @param number value, which index we are searching
      * @return position in array
      */
-    private int findIndex(double number) {
+    private int findIndexX(double number) {
         int index = 0;
         for (int i = 0; i < argument.length; i++) {
             if (number == argument[i]) {
@@ -191,6 +204,90 @@ public class ExtendFunction {
             }
         }
         return index;
+    }
+    
+    /**
+     * Finding index of current function value
+     * @param number value, which index we are searching
+     * @return position in array
+     */
+    private int findIndexY(double number) {
+        int index = 0;
+        for (int i = 0; i < differenceTable.length; i++) {
+            if (number == differenceTable[i][0]) {
+                index = i;
+            }
+        }
+        return index;
+    }
+    
+    /**
+     * Finds parameter t for reverse Newton interpolation
+     * @param yValue - function value
+     * @return function argument
+     */
+    private double calcArgumentBegin(double yValue) {
+        double nearSmallY = nearestSmallY(yValue);
+        int smallIndexY = findIndexY(nearSmallY);
+        // Initial parametr, which should be in approptiate interval 
+        double t = smallIndexY + hLength/2;
+        double tPrev = 0;
+        int counter = 1;
+        double checkY;
+        NumberFormat form = NumberFormat.getNumberInstance();
+        form.setMaximumFractionDigits(6);
+        printer.println();
+        printer.print("t = " + form.format(1 / differenceTable[smallIndexY][1]) + " * ( "+ form.format(yValue) + " - " + form.format(differenceTable[smallIndexY][0]));
+        printer.print(" - (t(t - 1)/2) * " + form.format(differenceTable[smallIndexY][2]) + " - (t(t - 1)(t - 2)/6) * " + form.format(differenceTable[smallIndexY][3]));
+        printer.println(" - (t(t - 1)(t - 2)(t - 3)/24) * " + form.format(differenceTable[smallIndexY][4]) + " )");
+        printer.println("Epsilon = " + epsilon);
+        while (Math.abs(t - tPrev) > epsilon) {
+            tPrev = t;
+            // formula for reverse Newton in the begginig of table
+            t = (yValue - differenceTable[smallIndexY][0] - (t*(t - 1)/2)*differenceTable[smallIndexY][2]  - (t*(t - 1)*(t - 2)/6)*differenceTable[smallIndexY][3]
+                    - (t*(t - 1)*(t - 2)*(t - 3)/24)*differenceTable[smallIndexY][4]) / differenceTable[smallIndexY][1];
+            checkY = calcNewtonBegin(t, smallIndexY);
+            printer.println("Step №(" + counter + ")  t = " + t + "  P(t) = " + checkY);
+            counter++;
+        }
+        double xAns = t * hLength + argument[smallIndexY];
+        return xAns;
+    }
+    
+    /**
+     * Calculating Newton Polinom 
+     * Table beginnig case
+     * @param t point in equation
+     * @param index 
+     */
+    private double calcNewtonBegin(double t, int index) {
+        double sum1 = differenceTable[index][0] + t*differenceTable[index][1] + (t * (t - 1)/2)*differenceTable[index][2]
+                + (t*(t - 1)*(t - 2)/6)*differenceTable[index][3]+(t * (t - 1)*(t - 2)*(t - 3)/24)*differenceTable[index][4];
+        return sum1;
+    }
+    
+    /**
+     * Calculating Newton Polinom 
+     * Table middle case
+     * @param t point in equation
+     * @param index 
+     */
+    private double calcNewtonMid(double t, int index) {
+        double sum1 = differenceTable[index][0] + t*differenceTable[index][1] + (t*(t - 1)/2)*differenceTable[index - 1][2]
+                + (t*(t - 1)*(t + 1)/6)*differenceTable[index - 1][3] + (t*(t - 1)*(t + 1)*(t - 2)/24)*differenceTable[index - 2][4];
+        return sum1;
+    }
+    
+    /**
+     * Calculating Newton Polinom 
+     * Table middle case
+     * @param t point in equation
+     * @param index 
+     */
+    private double calcNewtonEnd(double t, int index) {
+        double sum1 = differenceTable[index][0] + t*differenceTable[index - 1][1] + (t*(t + 1)/2)*differenceTable[index - 2][2]
+                + (t*(t + 1)*(t + 2)/6)*differenceTable[index - 3][3] + (t*(t + 1)*(t + 2)*(t + 3)/24)*differenceTable[index - 4][4]; 
+        return sum1;
     }
     
     /*
@@ -226,5 +323,11 @@ public class ExtendFunction {
     private final double x3 = 0.329726;
     private final double y1 = 1.680208;
     
+    private final double epsilon = Math.pow(10, -7);
+    
+    /**
+     * For file output
+     */
     private PrintWriter printer;
+    
 }
