@@ -241,14 +241,24 @@ public class ExtendFunction {
         printer.print(" - (t(t - 1)/2) * " + form.format(differenceTable[smallIndexY][2]) + " - (t(t - 1)(t - 2)/6) * " + form.format(differenceTable[smallIndexY][3]));
         printer.println(" - (t(t - 1)(t - 2)(t - 3)/24) * " + form.format(differenceTable[smallIndexY][4]) + " )");
         printer.println("Epsilon = " + epsilon);
+        double part;
+        double sum;
         while (Math.abs(t - tPrev) > epsilon) {
             tPrev = t;
             // formula for reverse Newton in the begginig of table
-            t = (yValue - differenceTable[smallIndexY][0] - (t*(t - 1)/2)*differenceTable[smallIndexY][2]  - (t*(t - 1)*(t - 2)/6)*differenceTable[smallIndexY][3]
-                    - (t*(t - 1)*(t - 2)*(t - 3)/24)*differenceTable[smallIndexY][4]) / differenceTable[smallIndexY][1];
+            part = t;
+            sum = yValue - differenceTable[smallIndexY][0];
+            for (int i = 2; i <= deltaDegree; i++) {
+                // suplement creation;
+                part = (t - i + 1) * part / i;
+                sum -= part * differenceTable[smallIndexY][i];
+            }
+            // Divide on Δy0
+            sum = sum / differenceTable[smallIndexY][1];
+            t = sum;
             checkY = calcNewtonBegin(t, smallIndexY);
             printer.println("Step №(" + counter + ")  t = " + t + "  P(t) = " + checkY);
-            counter++;
+            counter++;   
         }
         double xAns = t * hLength + argument[smallIndexY];
         return xAns;
@@ -261,9 +271,13 @@ public class ExtendFunction {
      * @param index 
      */
     private double calcNewtonBegin(double t, int index) {
-        double sum1 = differenceTable[index][0] + t*differenceTable[index][1] + (t * (t - 1)/2)*differenceTable[index][2]
-                + (t*(t - 1)*(t - 2)/6)*differenceTable[index][3]+(t * (t - 1)*(t - 2)*(t - 3)/24)*differenceTable[index][4];
-        return sum1;
+        double part = 1;
+        double sum = differenceTable[index][0];
+        for (int i = 1; i <= deltaDegree; i++) {
+            part = (t - i + 1) * part / i;
+            sum += part * differenceTable[index][i];
+        }
+        return sum;
     }
     
     /**
@@ -285,9 +299,13 @@ public class ExtendFunction {
      * @param index 
      */
     private double calcNewtonEnd(double t, int index) {
-        double sum1 = differenceTable[index][0] + t*differenceTable[index - 1][1] + (t*(t + 1)/2)*differenceTable[index - 2][2]
-                + (t*(t + 1)*(t + 2)/6)*differenceTable[index - 3][3] + (t*(t + 1)*(t + 2)*(t + 3)/24)*differenceTable[index - 4][4]; 
-        return sum1;
+        double part = 1;
+        double sum = differenceTable[index][0];
+        for (int i = 1; i <= deltaDegree; i++) {
+            part = (t + i - 1) * part / i;
+            sum += part * differenceTable[index - i][i];
+        }
+        return sum;
     }
     
     /*
