@@ -15,8 +15,8 @@ classdef lagrange
         statMat       
         % Column amount
         col = 5
-        % Error quantity
-        aError
+        % Maximum value
+        aMax
     end
     
     methods (Access = public) 
@@ -28,15 +28,19 @@ classdef lagrange
             obj.intFunc = func;
             obj.interval = curInterval;
             obj.lagPol = obj.initPol(obj.nodes);
+            obj.aMax = obj.calcMax();
             obj.statMat = obj.fillMat();
-            obj.statMat
+            % Create output
+            % Create different node cases
         end
         
         % Building plot 
         function buildPlot(obj)
+            figure;
             ezplot(obj.intFunc, [obj.interval(1) obj.interval(2)]);
-            hold all;
+            hold all
             plot(obj.statMat(:, 1), obj.statMat(:,3));
+            hold off
         end
         
         % Lagrange polynom creation
@@ -87,28 +91,24 @@ classdef lagrange
         
         % Calculating error quantity
         function error = calcError(obj, nodes, curX)
-            syms x;
             wProduct = 1;
-            len = length(nodes);
-            for i = 1:len
-                wProduct = wProduct * (x - nodes(i));
+            for i = 1:length(nodes)
+                wProduct = wProduct * (curX - nodes(i));
             end
-            % Finding derivative
-            devFunction = abs(diff(obj.intFunc, length(nodes)));
-            % Should be fixed
-            % Searching in nPart dots in interval
-            arg = obj.interval(1);
-            step = (obj.interval(2) - obj.interval(1))/(obj.nPart);
-            max = subs(devFunction, x, arg);
-            for i = 1:obj.nPart
-                curVal = subs(devFunction, x, arg);
-                if curVal > max
-                    max = curVal;
-                end
-                arg = arg + step;
-            end
-            error = subs(wProduct, x, curX) * max / factorial(len);
+            wProduct = abs(wProduct);
+            error = (wProduct * obj.aMax) / factorial(length(nodes));
         end
+        
+        % Calculates derivation maximum on interval
+        function maxValue = calcMax(obj)
+            syms x;
+            % Calculates derivation
+            devFunction = @(x) -abs(diff(obj.intFunc, length(obj.nodes)));
+            % Finding argument for maximum value on interval
+            maxArg = fminbnd(devFunction, obj.interval(1), obj.interval(2));
+            % Calculates maximum value
+            maxValue = abs(subs(diff(obj.intFunc, length(obj.nodes)), x, maxArg));
+        end 
                  
     end
             
