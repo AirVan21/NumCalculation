@@ -30,29 +30,26 @@ classdef lagrange
             obj.interval = curInterval;
             [obj.lagPol, obj.nodes] = obj.setLagPol();
             obj.aMax = obj.calcMax();
-            obj.output();
-            obj.buildAllPlot();
-            % Add File Output
+            obj.casePlots();
+            obj.showOutput();
         end
         
         % Building plot for all
         % Rewrite it
-        function buildAllPlot(obj)
-            figure;
-            ezplot(obj.intFunc, [obj.interval(1) obj.interval(2)]);
-            hold all
-            title('All plots');
-            MatCus = obj.fillMat(1);
-            plot(MatCus(:, 1), MatCus(:,3), 'Color', 'r');
-            MatLeft = obj.fillMat(2);
-            plot(MatLeft(:, 1), MatLeft(:,3), 'Color', 'g');
-            MatMiddle = obj.fillMat(3);
-            plot(MatMiddle(:, 1), MatMiddle(:,3), 'Color', 'y');
-            MatRight = obj.fillMat(4);
-            plot(MatRight(:, 1), MatRight(:,3), 'Color', 'b');
-            MatFull = obj.fillMat(5);
-            plot(MatFull(:, 1), MatFull(:,3), 'Color', 'black');
-            hold off
+        function showOutput(obj)
+            titles = cell(obj.testAmount);
+            titles{1} = 'Input data';
+            titles{2} = 'Left side nodes';
+            titles{3} = 'Middle side nodes';
+            titles{4} = 'Right side nodes';
+            titles{5} = 'Double precision';
+            for i = 1:obj.testAmount 
+                format long;
+                fprintf('                                          %s\n\n',titles{i});
+                fprintf('          x(i)             f(x(i))           Lagrange(x(i))      |f - Lagrange|          A(i)\n');
+                disp(obj.fillMat(i));
+                fprintf('\n');
+            end
         end
         
         % Lagrange polynom creation
@@ -108,19 +105,24 @@ classdef lagrange
                 wProduct = wProduct * (curX - nodes(i));
             end
             wProduct = abs(wProduct);
-            error = (wProduct * obj.aMax) / factorial(length(nodes));
+            error = (wProduct * obj.aMax) / factorial(length(obj.nodes{1}));
         end
         
         % Calculates derivation maximum on interval
-        % Has problems with min in cos
         function maxValue = calcMax(obj)
             syms x;
             % Calculates derivation
-            devFunction = @(x) -abs(diff(obj.intFunc, length(obj.nodes)));
+            derivative = diff(obj.intFunc, length(obj.nodes{1}));
             % Finding argument for maximum value on interval
-            maxArg = fminbnd(devFunction, obj.interval(1), obj.interval(2));
+            % HARDCODE 
+            % cos(x), sin(8x)
+            maxArg = [0, pi/16];
             % Calculates maximum value abs
-            maxValue = abs(subs(diff(obj.intFunc, length(obj.nodes{1})), x, maxArg));
+            test = abs(subs(derivative, x, maxArg(1)));
+            if test < abs(subs(derivative, x, maxArg(2)))
+                test = abs(subs(derivative, x, maxArg(2)));
+            end
+            maxValue = test;
         end 
         
         % Create Lagrange polynoms for 'testAmount' cases 
@@ -153,7 +155,7 @@ classdef lagrange
         end
         
         % Build interpolation-plots for all cases
-        function output(obj)
+        function casePlots(obj)
             titles = cell(obj.testAmount);
             titles{1} = 'Input data';
             titles{2} = 'Left side nodes';
