@@ -84,25 +84,40 @@ classdef integration
         
         % Creates Data matrix
         function matrix = buildData(obj)
-            matrix = zeros(3, 2);
+            matrix = zeros(3, 3);
+            % First node set
             matrix(1, 1) = vpa(obj.rectangleCalc(obj.nodeNum1));
             matrix(1, 2) = vpa(obj.rectangleCalc(obj.nodeNum2));
             matrix(2, 1) = vpa(obj.trapezeCalc(obj.nodeNum1));
+            % Second node set
             matrix(2, 2) = vpa(obj.trapezeCalc(obj.nodeNum2));
             matrix(3, 1) = vpa(obj.simpsonCalc(obj.nodeNum1));
             matrix(3, 2) = vpa(obj.simpsonCalc(obj.nodeNum2));
+            % Runge optimization
+            % For rectangel, trapeze k = 2
+            % For simpson k = 4
+            runge2 = 2^2;
+            runge4 = 2^4;
+            matrix(1, 3) = (matrix(1,1) - runge2 * matrix(1, 2)) / (1 - runge2);
+            matrix(2, 3) = (matrix(2,1) - runge2 * matrix(2, 2)) / (1 - runge2);
+            matrix(3, 3) = (matrix(3,1) - runge4 * matrix(3, 2)) / (1 - runge4);
+        end
+        
+        % Calculating integration error
+        function error = calcError(obj)
+            error = zeros(1, 3);
         end
         
         % Printing results
         function output(obj)
             format long;
-%             matrix(1,1) = 'Rectang';
-%             matrix(2,1) = 'Trapeze';
-%             matrix(3,1) = 'Simpson';
             fprintf('\n   Optimal = ');
             disp(vpa(obj.idealCalc()));
-            disp('           n8                 n16');
+            disp('           n8                 n16                Runge');
             disp(obj.dataMatrix);
+            disp('Rectang');
+            disp('Trapeze');
+            disp('Simpson');
         end
     end
     
