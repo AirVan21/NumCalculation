@@ -29,6 +29,7 @@ classdef integration
             obj.lowBound = bounds(1);
             obj.highBound = bounds(2);
             obj.dataMatrix = obj.buildData();
+            obj = obj.calcError();
             obj.output();
         end
         
@@ -84,7 +85,7 @@ classdef integration
         
         % Creates Data matrix
         function matrix = buildData(obj)
-            matrix = zeros(3, 3);
+            matrix = zeros(3, 4);
             % First node set
             matrix(1, 1) = vpa(obj.rectangleCalc(obj.nodeNum1));
             matrix(1, 2) = vpa(obj.rectangleCalc(obj.nodeNum2));
@@ -104,8 +105,27 @@ classdef integration
         end
         
         % Calculating integration error
-        function error = calcError(obj)
-            error = zeros(1, 3);
+        function obj = calcError(obj)
+            syms x;
+            % Search for max derivative
+            % 2nd diff
+            diffTwo = diff(obj.mainFunc, 2);
+            % 4th diff
+            diffFour = diff(obj.mainFunc, 4);
+            figure;
+            ezplot(diffTwo, [obj.lowBound, obj.highBound]);
+            prompt = 'Argument for Maximum for derivative = ';
+            result = input(prompt);
+            max2 = abs(subs(diffTwo, x, result));
+            figure;
+            ezplot(diffFour, [obj.lowBound, obj.highBound]);
+            result = input(prompt);
+            max4 = abs(subs(diffFour, x, result));
+            % For rectangle & trapeze, using equal error estimation k = 2
+            obj.dataMatrix(1,4) = abs((obj.highBound - obj.lowBound)^3 / (24*(obj.nodeNum1)^2)) * max2;
+            obj.dataMatrix(2,4) = obj.dataMatrix(1,4);
+            % For simpson another error estimation k = 4
+            obj.dataMatrix(3, 4) = abs((obj.highBound - obj.lowBound)^5 / (2880*(obj.nodeNum1)^4)) * max4;
         end
         
         % Printing results
@@ -113,7 +133,7 @@ classdef integration
             format long;
             fprintf('\n   Optimal = ');
             disp(vpa(obj.idealCalc()));
-            disp('           n8                 n16                Runge');
+            disp('           n8                 n16                Runge              Error ');
             disp(obj.dataMatrix);
             disp('Rectang');
             disp('Trapeze');
