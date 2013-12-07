@@ -76,7 +76,7 @@ classdef diffEquation
                     (5/12) * divideMat(i - 3,5) + (3/8) * divideMat(i - 4, 6) + (251/720) * divideMat(i - 5, 7);
             end
             fprintf('\n                                         Divided differences \n\n');
-            disp('          eta              delta(1)            delta(2)             delta(3)             delta(4)'); 
+            disp('          etta              delta(1)            delta(2)             delta(3)             delta(4)'); 
             disp(divideMat(:,3:7));
         end
         
@@ -100,6 +100,43 @@ classdef diffEquation
             end
         end
         
+        % Error calculation
+        function [estimation] = calcError(obj, euler, adams)
+            diffFuncY = @(x,y)((6*y + 1.5)*(20*x*y + 4) - 20*x*(3*y^2+1.5*y + 1))/(20*x*y + 4)^2;
+            diffFuncX = @(x,y)(3*y^2 + 1.5*y + 1)*(4 - 20*y)/(20*x*y + 4);
+            % Amount of node points
+            amount = ceil(obj.highBound / obj.step) + 1;
+            estimation = zeros(2, amount);
+            % Start interval point
+            x = 0;
+            % Init place for maximum values
+            max = 0;
+            maxX = 0;
+            maxY = 0;
+            % Calculating maximum
+            for i = 1 : amount
+                % M1
+                if max < abs(obj.diffFunc(x, adams(i)))
+                    max = abs(obj.diffFunc(x, adams(i)));
+                end
+                % M2
+                if maxX < abs(diffFuncX(x, adams(i)))
+                    maxX = abs(diffFuncX(x, adams(i)));
+                end
+                % M3
+                if maxY < abs(diffFuncY(x, adams(i)))
+                    maxY = abs(diffFuncY(x, adams(i)));
+                end
+                x = x + obj.step;
+            end
+            M4 = maxX + max*maxY;
+            for i = 1 : amount
+                estimation(1,i) = abs(euler(i) - adams(i));
+                estimation(2,i) = (M4/2*maxY)*obj.step*exp(maxY * (i - 1) * obj.step);
+            end
+            %disp(estimation);
+        end
+        
         % Makes plots
         function output(obj)
             % Euler method 
@@ -109,6 +146,7 @@ classdef diffEquation
             [x2, y2] = obj.eulerMethod(obj.step / 2);
             [x3, y3] = obj.eulerMethod(2 * obj.step);
             [x4, y4] = obj.rungekuttMethod(obj.step);
+            % Set help parametrs from Runge-Kutta
             [x5, y5] = obj.adamsMethod(obj.step, y4);
             plot(x1, y1, x2, y2, x3, y3, x4, y4, x5, y5);
             hleg = legend('Euler h', 'Euler h/2', 'Euler 2h','Runge-Kutta h', 'Adams h', 'Location', 'NorthEastOutside');
@@ -122,6 +160,11 @@ classdef diffEquation
             disp(y4(6));
             fprintf('y(5)       Adams =');
             disp(y5(6));
+            fprintf('\n');
+            disp('                                           Estimation ERROR');
+            fprintf('\n');
+            [estimation] = obj.calcError(y1,y5);
+            disp(estimation(:, 1:10));
         end
         
     end
