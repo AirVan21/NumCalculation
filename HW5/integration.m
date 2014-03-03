@@ -28,6 +28,7 @@ classdef integration
             obj.anonymousFunc = anFunc;
             obj.lowBound = bounds(1);
             obj.highBound = bounds(2);
+            ezplot(obj.mainFunc, [obj.lowBound, obj.highBound]);
             obj.dataMatrix = obj.buildData();
             obj = obj.calcError();
             obj.output();
@@ -85,7 +86,7 @@ classdef integration
         
         % Creates Data matrix
         function matrix = buildData(obj)
-            matrix = zeros(3, 4);
+            matrix = zeros(3, 5);
             % First node set
             matrix(1, 1) = vpa(obj.rectangleCalc(obj.nodeNum1));
             matrix(1, 2) = vpa(obj.rectangleCalc(obj.nodeNum2));
@@ -126,6 +127,11 @@ classdef integration
             obj.dataMatrix(2,4) = obj.dataMatrix(1,4);
             % For simpson another error estimation k = 4
             obj.dataMatrix(3, 4) = abs((obj.highBound - obj.lowBound)^5 / (2880*(obj.nodeNum1)^4)) * max4;
+            % Show difference
+            optimal = obj.idealCalc();
+            obj.dataMatrix(1, 5) = abs(optimal - obj.dataMatrix(1,1));
+            obj.dataMatrix(2, 5) = abs(optimal - obj.dataMatrix(2,1));
+            obj.dataMatrix(3, 5) = abs(optimal - obj.dataMatrix(3,1));
         end
         
         % Printing results
@@ -133,7 +139,7 @@ classdef integration
             format long;
             fprintf('\n   Optimal = ');
             disp(vpa(obj.idealCalc()));
-            disp('           n8                 n16                Runge              Error ');
+            disp('           n8                 n16                Runge              Error                Fact');
             disp(obj.dataMatrix);
             disp('Rectang');
             disp('Trapeze');

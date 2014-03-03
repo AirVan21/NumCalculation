@@ -148,8 +148,18 @@ classdef diffEquation
             [x4, y4] = obj.rungekuttMethod(obj.step);
             % Set help parametrs from Runge-Kutta
             [x5, y5] = obj.adamsMethod(obj.step, y4);
-            plot(x1, y1, x2, y2, x3, y3, x4, y4, x5, y5);
-            hleg = legend('Euler h', 'Euler h/2', 'Euler 2h','Runge-Kutta h', 'Adams h', 'Location', 'NorthEastOutside');
+            % plot(x1, y1, x2, y2, x3, y3, x5, y5);
+            matrix = zeros(22, 5);
+            fprintf('\n');
+            fprintf('\n');
+            disp('          Euler h            Euler h/2          Euler 2h            RUNGE             ADAMS');
+            matrix(1:11, 1) = y1;
+            matrix(1:21, 2) = y2;
+            matrix(1:6, 3) = y3;
+            matrix(1:11, 4) = y4;
+            matrix(1:11, 5) = y5;
+            disp(matrix);
+            hleg = legend('Euler h', 'Euler h/2', 'Euler 2h', 'Adams h', 'Location', 'NorthEastOutside');
             set(hleg);
             ylabel('dy/dx');
             xlabel('x');
