@@ -9,13 +9,15 @@ function matS = calcMatS(matA)
     % Вычисляем оставшиеся элементы
     for i = 2 : rows
         % Поиск диагональных элементов
-        sum1 = matS(1:i - 1, i)'* matS(1:i - 1, i);
+        sum1 = sum(matS(1:i - 1, i).^(2));
         matS(i,i) = sqrt(matA(i,i) - sum1);
-        
         %Поиск оставшихся (недиагональных) элементов
         for j = i + 1 : rows
-            sum2 = matS(1 : i -1, i)' * matS(1 : i-1, j);
-            matS(i, j) = (matA(i, j) - sum2) / matS(i,i);
+            sum2 = 0;
+            for l = 1 : i -1
+                sum2 = sum2 + matS(l,i) * matS(l,j);
+            end
+            matS(i, j) = (matA(i, j) - sum2) ./ matS(i,i);
         end
     end  
 end
