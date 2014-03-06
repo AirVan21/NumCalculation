@@ -8,10 +8,10 @@ delta = 10^(-5);
 % Constant for testing
 theta = 0.1;
 fprintf('\n\n');
-disp('   Simple test. Diagonal dominance - true');
+disp('   Nekrasov`s test. Diagonal dominance - true');
 disp('      a1        a2        a3        b');
 disp([matA, B]);
-[ansX, iterStep] = iterMethod([matA,B], B1, delta);
+[ansX, iterStep] = nekrasovMethod([matA,B], B1, delta);
 disp('    Solution (X) :');
 disp(ansX);
 disp('   Test(A*X)  Data(b)');
@@ -28,7 +28,7 @@ for i = 1 : length(matA)
 end
 disp('      a1        a2        a3        b');
 disp([matA10, B]);
-[ansX, iterStep] = iterMethod([matA10,B], B1, delta);
+[ansX, iterStep] = nekrasovMethod([matA10,B], B1, delta);
 disp('    Solution (X) :');
 disp(ansX);
 disp('   Test(A*X)  Data(b)');
@@ -45,7 +45,7 @@ for i = 1 : length(matA)
 end
 disp('      a1        a2        a3        b');
 disp([matA100, B]);
-[ansX, iterStep] = iterMethod([matA100,B], B1, delta);
+[ansX, iterStep] = nekrasovMethod([matA100,B], B1, delta);
 disp('    Solution (X) :');
 disp(ansX);
 disp('   Test(A*X)  Data(b)');
@@ -60,7 +60,7 @@ matAD11 = matA;
 matAD11(1,1) = sum(abs(matAD11(1,:))) - matAD11(1,1) - theta; 
 disp('      a1        a2        a3        b');
 disp([matAD11, B]);
-[ansX, iterStep] = iterMethod([matAD11,B], B1, delta);
+[ansX, iterStep] = nekrasovMethod([matAD11,B], B1, delta);
 disp('    Solution (X) :');
 disp(ansX);
 disp('   Test(A*X)  Data(b)');
@@ -74,7 +74,7 @@ matAD22 = matAD11;
 matAD22(2,2) = sum(abs(matAD22(2,:))) - matAD22(2,2) - theta; 
 disp('      a1        a2        a3        b');
 disp([matAD22, B]);
-[ansX, iterStep] = iterMethod([matAD22,B], B1, delta);
+[ansX, iterStep] = nekrasovMethod([matAD22,B], B1, delta);
 disp('    Solution (X) :');
 disp(ansX);
 disp('   Test(A*X)  Data(b)');
@@ -90,7 +90,7 @@ for i = -0.5:0.1:0.0
     matAD33(3,3) = sum(abs(matAD33(3,:))) - matAD33(3,3) - i; 
     disp('      a1        a2        a3        b');
     disp([matAD33, B]);
-    [ansX, iterStep] = iterMethod([matAD33,B], B1, delta);
+    [ansX, iterStep] = nekrasovMethod([matAD33,B], B1, delta);
     disp('    Solution (X) :');
     disp(ansX);
     disp('   Test(A*X)  Data(b)');
@@ -99,6 +99,4 @@ for i = -0.5:0.1:0.0
     disp('______________________________________________________________________________________');
     fprintf('\n\n');
 end
-
-
 
