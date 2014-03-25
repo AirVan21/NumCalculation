@@ -2,7 +2,9 @@
 A = [2.68, 1.83, 0.94;
      1.83, 2.71, 0.47;
      0.94, 0.47, 2.53];
- 
+
+ copyA = A;
+
 % Describes acccurancy
 epsilon = 10^(-5);
 
@@ -18,7 +20,7 @@ iterStep = 1;
 
 % Jacobi method iteration
 % Minimization for non-diagonal elements
-while (~isdiag(A) && (max(abs(diagCur - diagPrev))> epsilon))
+while ((max(abs(diagCur - diagPrev))> epsilon))
     disp('_______________________________________________________');
     % Stores diagonal elements
     diagonal = diag(A);
@@ -30,6 +32,12 @@ while (~isdiag(A) && (max(abs(diagCur - diagPrev))> epsilon))
     i = maxRowIndexPerCol(j);
     A = A + diag(diagonal); 
     
+    % Fix for diagonal iteration
+    if i == j
+        i = 1;
+        j = 2;
+    end
+    
     % Output part
     fprintf('\n   Iteration ¹ = %d\n', iterStep);
     disp('   Input matrix:');
@@ -38,15 +46,28 @@ while (~isdiag(A) && (max(abs(diagCur - diagPrev))> epsilon))
     disp(A(i,j));
     
     % Sets maximum abs() element to zero
-    diagPrev = diag(A);
-    d = ((A(i,i) - A(j,j))^2 + 4*A(i,j)^2) ^ (1/2);
-    A(i,i) = (A(i,i) + A(j,j))/2 + sign(A(i,i) - A(j,j))*(d/2);
-    A(j,j) = (A(i,i) + A(j,j))/2 - sign(A(i,i) - A(j,j))*(d/2);
-    A(i,j) = 0;
-    A(j,i) = 0;
+    C = A;
+    
+    d = ((A(i,i) - A(j,j))^2 + 4*A(i,j)^2)^(0.5);
+    c = (0.5 * (1 + abs(A(i,i) - A(j,j))/d))^(0.5);
+    s = sign(A(i,j)*(A(i,i) - A(j,j)))*(0.5 * (1 - abs(A(i,i) - A(j,j))/d))^(0.5);
+    
+    for k = 1 : length(A)
+        C(k,i) = c*A(k,i) + s*A(k,j);
+        C(i,k) = A(k,i);
+        if (k ~= i && k~=j)
+            C(k,j) = -s*A(k,i) + c*A(k,j);
+            C(j,k) = C(k,j);
+        end
+    end
+    
+    C(i,i) = (A(i,i) + A(j,j))/2 + sign(A(i,i) - A(j,j))*(d/2);
+    C(j,j) = (A(i,i) + A(j,j))/2 - sign(A(i,i) - A(j,j))*(d/2);
+    C(i,j) = 0;
+    C(j,i) = 0;
+    A = C;
     diagCur = diag(A);
     iterStep = iterStep + 1;
-    
     % Show Results
     disp('   Transformed to:');
     disp(A);
@@ -57,4 +78,5 @@ disp('_______________________________________________________');
 fprintf('\n\n');
 format long;
 disp('   Our diagonal of A   Matlab Eigen Values ');
-disp([diag(A), eig(A)]);
+
+disp([sort(diag(A)), sort(eig(copyA))]);
