@@ -6,7 +6,7 @@ A = [2.68, 1.83, 0.94;
 y = [-1.32; -0.645; -1.735];
 
 % Describes acccurancy
-epsilon = 10^(-5);
+epsilon = 10^(-6);
 
 %_____________________________________________________%
 format short
@@ -28,13 +28,18 @@ while(max(abs(yNext - y)) > epsilon)
     fprintf('\n   Iteration ¹ = %d\n', iterStep);
     disp('    ~Y(n)    ~Y(n+1)');
     disp([y, yNext]);
+%     format long;
+%     disp(yNext./y);
+%     format short;
     iterStep = iterStep + 1;
 end
 
 % Result yNext : eigen vector for A matrix
 % eigen(1) - eigen value for yNext
 disp(' Eigen Value (all component) :');
+format long;
 eigen = A*yNext ./ yNext;
 disp(eigen);
+format short;
 disp('    A * x   Eigen value * x');
 disp([A*yNext, eigen(1)*yNext]);

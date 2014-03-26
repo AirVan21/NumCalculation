@@ -23,9 +23,9 @@ iterStep = 1;
 while ((max(abs(diagCur - diagPrev))> epsilon))
     disp('_______________________________________________________');
     % Stores diagonal elements
+    diagPrev = diag(A);
     diagonal = diag(A);
     A = A - diag(diagonal);
-    
     % Calculates maximum non-diagonal element
     [maxElementVector, maxRowIndexPerCol] = max(abs(A));
     [maxElement, j] = max(abs(maxElementVector)); 
@@ -39,11 +39,11 @@ while ((max(abs(diagCur - diagPrev))> epsilon))
     end
     
     % Output part
-    fprintf('\n   Iteration ¹ = %d\n', iterStep);
-    disp('   Input matrix:');
-    disp(A);
-    fprintf('   Maximum non-diag |a(i,j)| = a(%d,%d) = ', i, j);
-    disp(A(i,j));
+%     fprintf('\n   Iteration ¹ = %d\n', iterStep);
+%     disp('   Input matrix:');
+%     disp(A);
+%     fprintf('   Maximum non-diag |a(i,j)| = a(%d,%d) = ', i, j);
+%     disp(A(i,j));
     
     % Sets maximum abs() element to zero
     C = A;
@@ -54,8 +54,11 @@ while ((max(abs(diagCur - diagPrev))> epsilon))
     
     for k = 1 : length(A)
         C(k,i) = c*A(k,i) + s*A(k,j);
-        C(i,k) = A(k,i);
-        if (k ~= i && k~=j)
+        C(i,k) = C(k,i);
+    end
+    
+    for k = 1 : length(A)
+        if (k ~= i && k ~= j)
             C(k,j) = -s*A(k,i) + c*A(k,j);
             C(j,k) = C(k,j);
         end
