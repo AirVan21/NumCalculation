@@ -42,27 +42,18 @@ while ((max(abs(diagCur - diagPrev))> epsilon))
     fprintf('   Maximum non-diag |a(i,j)| = a(%d,%d) = ', i, j);
     disp(A(i,j));
     
-    % Sets maximum abs() element to zero
-    C = A;
-    
     d = ((A(i,i) - A(j,j))^2 + 4*A(i,j)^2)^(0.5);
     c = (0.5 * (1 + abs(A(i,i) - A(j,j))/d))^(0.5);
     s = sign(A(i,j)*(A(i,i) - A(j,j)))*(0.5 * (1 - abs(A(i,i) - A(j,j))/d))^(0.5);
     
-    for k = 1 : length(A)
-        C(k,i) = c*A(k,i) + s*A(k,j);
-        C(i,k) = C(k,i);
-        if (k ~= i && k ~= j)
-            C(k,j) = -s*A(k,i) + c*A(k,j);
-            C(j,k) = C(k,j);
-        end
-    end
+    % Rotation matrix
+    C = eye(length(A));
+    C(i,i) = c;
+    C(i,j) = -s;
+    C(j,i) = s;
+    C(j,j) = c;
+    A = C'*A*C;
     
-    C(i,i) = (A(i,i) + A(j,j))/2 + sign(A(i,i) - A(j,j))*(d/2);
-    C(j,j) = (A(i,i) + A(j,j))/2 - sign(A(i,i) - A(j,j))*(d/2);
-    C(i,j) = 0;
-    C(j,i) = 0;
-    A = C;
     diagCur = diag(A);
     iterStep = iterStep + 1;
     % Show Results
