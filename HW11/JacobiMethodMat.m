@@ -9,7 +9,7 @@ A = [2.68, 1.83, 0.94;
 epsilon = 10^(-5);
 
 %_____________________________________________________%
-format short;
+format long;
 disp('   Input Data:');
 disp('      a1        a2        a3     ');
 disp(A);
