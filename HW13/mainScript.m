@@ -32,7 +32,7 @@ end
 % Step for 't' line 
 tau1 = (stepLength1^2) / 3;
 tau2 = (stepLength2^2) / 3;
-mLayers = 950;
+mLayers = 550;
 
 T1 = mLayers * tau1;
 T2 = mLayers * tau2;
@@ -49,9 +49,12 @@ for i = 1 : mLayers + 1
     tN2(i) = aBound + (i - 1)*tau2;
 end
 
-disp('Test N = 10');
+disp('Test = 10, Columns: 2, 3, 4, 5');
+fprintf('t in [0, %4.4f]\n', T1);
+disp(' ');
+disp(' ');
 % format short
-% [decision10, accurate10] = netMethod(xN1, tN1, stepLength1, tau1, f, ux0, u0t, u1t, nStep1, mLayers, result);
+[decision10, accurate10] = netMethod(xN1, tN1, stepLength1, tau1, f, ux0, u0t, u1t, nStep1, mLayers, result);
 % for k = 1 : mLayers
 %     if mod(k, 50) == 0
 %         disp('____________________________________________________________________________________________________________');
@@ -64,7 +67,17 @@ disp('Test N = 10');
 % disp(' ');
 % disp(' ');
 format long
-for k = 1 : mLayers
+disp('____________________________________________________________________________________________________________');
+fprintf('n=10  t=%d  :',  1); 
+disp(decision10(1,2:5));
+fprintf('Test model :');
+disp(accurate10(1,2:5));
+disp('____________________________________________________________________________________________________________');
+fprintf('n=10  t=%d :',  50); 
+disp(decision10(50,2:5));
+fprintf('Test model :');
+disp(accurate10(50,2:5));
+for k = 100 : mLayers
     if mod(k, 50) == 0
         disp('____________________________________________________________________________________________________________');
         fprintf('n=10  t=%d:',  k); 
@@ -73,39 +86,81 @@ for k = 1 : mLayers
         disp(accurate10(k,2:5));
     end
 end
+
+
+
+
 disp(' ');
 disp(' ');
-disp('Test N = 100');
 [decision10, accurate10] = netMethod(xN1, tN2, stepLength1, tau2, f, ux0, u0t, u1t, nStep1, mLayers, result);
 [decision100, accurate100] = netMethod(xN2, tN2, stepLength2, tau2, f, ux0, u0t, u1t, nStep2, mLayers, result);
-% format short
-% for k = 1 : mLayers
-%     if mod(k, 50) == 0
-%         disp('____________________________________________________________________________________________________________');
-%         fprintf('n=10  t=%d:',  k); 
-%         disp(decision10(k,:));
-%         fprintf('n=100 t=%d:',  k); 
-%         disp(decision100(k,1:10:101));
-%         fprintf('Test model :');
-%         disp(accurate100(k,1:10:101));
-%     end
-% end
-disp(' ');
-disp(' ');
 disp('Test = 100, Columns: 2, 3, 4, 5');
+fprintf('t in [0, %4.4f]\n', T2);
+disp(' ');
+disp(' ');
 format long;
-for k = 1 : mLayers
+disp('____________________________________________________________________________________________________________');
+fprintf('n=10  t=%d  :',  1); 
+disp(decision10(1,2:5));
+fprintf('n=100 t=%d  :',  1); 
+disp(decision100(1,11:10:41));
+fprintf('Test model :');
+disp(accurate100(1,11:10:41));
+disp('____________________________________________________________________________________________________________');
+fprintf('n=10  t=%d :',  50); 
+disp(decision10(50,2:5));
+fprintf('n=100 t=%d :',  50); 
+disp(decision100(50,11:10:41));
+fprintf('Test model :');
+disp(accurate100(50,11:10:41));
+for k = 100 : mLayers
     if mod(k, 50) == 0
         disp('____________________________________________________________________________________________________________');
         fprintf('n=10  t=%d:',  k); 
         disp(decision10(k,2:5));
         fprintf('n=100 t=%d:',  k); 
-        disp(decision100(k,10:10:41));
+        disp(decision100(k,11:10:41));
         fprintf('Test model :');
-        disp(accurate100(k,10:10:41));
+        disp(accurate100(k,11:10:41));
     end
 end
 
+
+
+decisionImp10 = implicitNet(xN1, tN2, stepLength1, tau2, f, ux0, u0t, u1t);
+decisionImp100 = implicitNet(xN2, tN2, stepLength2, tau2, f, ux0, u0t, u1t);
+disp(' ');
+disp(' ');
+disp('Test Implicit = 100, Columns: 2, 3, 4, 5');
+fprintf('t in [0, %4.4f]\n', T2);
+disp(' ');
+disp(' ');
+format long;
+disp('____________________________________________________________________________________________________________');
+fprintf('n=10  t=%d  :',  1); 
+disp(decisionImp10(1,2:5));
+fprintf('n=100 t=%d  :',  1); 
+disp(decisionImp100(1,11:10:41));
+fprintf('Test model :');
+disp(accurate100(1,11:10:41));
+disp('____________________________________________________________________________________________________________');
+fprintf('n=10  t=%d :',  50); 
+disp(decisionImp10(50,2:5));
+fprintf('n=100 t=%d :',  50); 
+disp(decisionImp100(50,11:10:41));
+fprintf('Test model :');
+disp(accurate100(50,11:10:41));
+for k = 100 : mLayers
+    if mod(k, 50) == 0
+        disp('____________________________________________________________________________________________________________');
+        fprintf('n=10  t=%d:',  k); 
+        disp(decisionImp10(k,2:5));
+        fprintf('n=100 t=%d:',  k); 
+        disp(decisionImp100(k,11:10:41));
+        fprintf('Test model :');
+        disp(accurate100(k,11:10:41));
+    end
+end
 
 
 

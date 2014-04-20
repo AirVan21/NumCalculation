@@ -41,6 +41,11 @@ for i = 1 : 10 : 101
     j = j + 1;
     accurate(j) = answer100(i);
 end
+
+disp('Result(10)  Result(100) Precise value');
+format short
+disp([answer10, accurate, sin(x10)]);
+
 disp('       Result(10)          Result(100)      Precise value');
 format long
 disp([answer10, accurate, sin(x10)]);

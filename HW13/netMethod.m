@@ -1,4 +1,4 @@
-% Net method for heating equation
+% Net method for thermal equation
 function [decisionMat, resultMat] = netMethod(x, t, h, tau, f, u_x0, u_at, u_bt, nStep, mLayers, resultFunc)
     resultMat = zeros(mLayers + 1, nStep + 1);
     decisionMat = zeros(mLayers + 1, nStep + 1);
